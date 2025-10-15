@@ -3,8 +3,12 @@
 set -o errexit
 
 # Instalar dependencias
+echo "Instalando dependencias..."
 pip install --upgrade pip
 pip install -r requirements.txt
+
+# Configurar Flask app
+export FLASK_APP=app.py
 
 # Inicializar migraciones si no existen
 if [ ! -d "migrations" ]; then

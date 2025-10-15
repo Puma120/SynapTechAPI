@@ -29,7 +29,7 @@ API Backend para SynapTech - Sistema de gestión de tareas y rutinas con IA.
    - **Root Directory**: `backend`
    - **Runtime**: `Python 3`
    - **Build Command**: `./build.sh`
-   - **Start Command**: `gunicorn -c gunicorn_config.py run:app`
+   - **Start Command**: `gunicorn -c gunicorn_config.py app:app`
 
 ### 3. Variables de Entorno
 
