@@ -2,6 +2,16 @@
 
 API REST para la aplicacion SynapTech - Sistema de gestion de tareas y rutinas para personas con ADHD.
 
+## 🚀 Inicio Rápido
+
+### Despliegue en Render (Producción)
+- 📖 **[QUICKSTART.md](QUICKSTART.md)** - Guía rápida de despliegue
+- 📚 **[DEPLOYMENT.md](DEPLOYMENT.md)** - Documentación completa de despliegue
+- 📡 **[API_ENDPOINTS.md](API_ENDPOINTS.md)** - Referencia de endpoints
+
+### Desarrollo Local
+Ver sección [Instalación](#instalacion) abajo
+
 ## Caracteristicas
 
 - Autenticacion JWT

@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: synaptech-api
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn -c gunicorn_config.py run:app"
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DATABASE_URL
+        fromDatabase:
+          name: synaptech-db
+          property: connectionString
+      - key: JWT_SECRET_KEY
+        generateValue: true
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+
+databases:
+  - name: synaptech-db
+    databaseName: synaptech_db
+    user: synaptech_user

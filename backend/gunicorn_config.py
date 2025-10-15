@@ -1,11 +1,12 @@
 import multiprocessing
+import os
 
 # Configuracion de Gunicorn para produccion
-bind = "0.0.0.0:5000"
+bind = f"0.0.0.0:{os.getenv('PORT', '5000')}"
 workers = multiprocessing.cpu_count() * 2 + 1
 worker_class = "sync"
 worker_connections = 1000
-timeout = 30
+timeout = 120  # Aumentado para operaciones de IA
 keepalive = 2
 
 # Logging
@@ -21,12 +22,8 @@ user = None
 group = None
 tmp_upload_dir = None
 
-# SSL (para produccion)
-# keyfile = "/path/to/keyfile"
-# certfile = "/path/to/certfile"
-
 # Nombre del proceso
 proc_name = "synaptech_api"
 
-# Reload automatico en desarrollo
+# Reload automatico en desarrollo (deshabilitado en produccion)
 reload = False
