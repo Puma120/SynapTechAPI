@@ -29,7 +29,7 @@ Dashboard → New + → Web Service
 Repository: Tu repo de GitHub
 Root Directory: backend
 Build Command: ./build.sh
-Start Command: gunicorn -c gunicorn_config.py app:app
+Start Command: gunicorn -c gunicorn_config.py wsgi:app
 ```
 
 ### 3️⃣ Variables de Entorno Mínimas

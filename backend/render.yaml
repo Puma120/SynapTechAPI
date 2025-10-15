@@ -3,7 +3,7 @@ services:
     name: synaptech-api
     env: python
     buildCommand: "./build.sh"
-    startCommand: "gunicorn -c gunicorn_config.py app:app"
+    startCommand: "gunicorn -c gunicorn_config.py wsgi:app"
     envVars:
       - key: FLASK_ENV
         value: production

@@ -8,7 +8,7 @@ pip install --upgrade pip
 pip install -r requirements.txt
 
 # Configurar Flask app
-export FLASK_APP=app.py
+export FLASK_APP=wsgi.py
 
 # Inicializar migraciones si no existen
 if [ ! -d "migrations" ]; then

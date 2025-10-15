@@ -61,12 +61,12 @@ flask init-db
 
 ### Desarrollo
 ```bash
-python run.py
+python wsgi.py
 ```
 
 ### Produccion con Gunicorn
 ```bash
-gunicorn -c gunicorn_config.py run:app
+gunicorn -c gunicorn_config.py wsgi:app
 ```
 
 ## Endpoints Principales
