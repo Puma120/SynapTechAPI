@@ -18,12 +18,12 @@ def register():
         
         email = data.get('email', '').strip().lower()
         password = data.get('password', '')
-        full_name = data.get('full_name', '').strip()
+        name = data.get('name', '').strip()
         role = data.get('role', 'user')
         
         # Validar campos requeridos
-        if not email or not password or not full_name:
-            return jsonify({'error': 'Email, contrasena y nombre completo son requeridos'}), 400
+        if not email or not password or not name:
+            return jsonify({'error': 'Email, password y name son requeridos'}), 400
         
         # Validar email
         if not validate_email(email):
@@ -42,7 +42,7 @@ def register():
         # Crear nuevo usuario
         user = User(
             email=email,
-            full_name=full_name,
+            full_name=name,
             role=role if role in ['user', 'caregiver', 'therapist'] else 'user'
         )
         user.set_password(password)
@@ -56,9 +56,8 @@ def register():
         
         return jsonify({
             'message': 'Usuario registrado exitosamente',
-            'user': user.to_dict(),
             'access_token': access_token,
-            'refresh_token': refresh_token
+            'user': user.to_dict()
         }), 201
         
     except Exception as e:
@@ -94,10 +93,9 @@ def login():
         refresh_token = create_refresh_token(identity=user.id)
         
         return jsonify({
-            'message': 'Inicio de sesion exitoso',
-            'user': user.to_dict(),
+            'message': 'Login exitoso',
             'access_token': access_token,
-            'refresh_token': refresh_token
+            'user': user.to_dict()
         }), 200
         
     except Exception as e:
@@ -114,9 +112,7 @@ def get_current_user():
         if not user:
             return jsonify({'error': 'Usuario no encontrado'}), 404
         
-        return jsonify({
-            'user': user.to_dict()
-        }), 200
+        return jsonify(user.to_dict()), 200
         
     except Exception as e:
         return jsonify({'error': f'Error al obtener usuario: {str(e)}'}), 500
