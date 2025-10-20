@@ -13,22 +13,23 @@ def create_app(config_name='development'):
     jwt.init_app(app)
     CORS(app, origins=app.config['CORS_ORIGINS'])
     
-    # Registrar blueprints
+    # Registrar blueprints - versión simplificada con IA
     from app.routes.auth import auth_bp
     from app.routes.tasks import tasks_bp
     from app.routes.routines import routines_bp
-    from app.routes.ai import ai_bp
-    from app.routes.sync import sync_bp
-    from app.routes.calendar import calendar_bp
-    from app.routes.reports import reports_bp
+    # Rutas antiguas comentadas - ahora todo está integrado con IA
+    # from app.routes.ai import ai_bp
+    # from app.routes.sync import sync_bp
+    # from app.routes.calendar import calendar_bp
+    # from app.routes.reports import reports_bp
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(tasks_bp)
     app.register_blueprint(routines_bp)
-    app.register_blueprint(ai_bp)
-    app.register_blueprint(sync_bp)
-    app.register_blueprint(calendar_bp)
-    app.register_blueprint(reports_bp)
+    # app.register_blueprint(ai_bp)
+    # app.register_blueprint(sync_bp)
+    # app.register_blueprint(calendar_bp)
+    # app.register_blueprint(reports_bp)
     
     # Ruta de salud
     @app.route('/health')
@@ -39,17 +40,19 @@ def create_app(config_name='development'):
     @app.route('/')
     def index():
         return {
-            'message': 'SynapTech API',
-            'version': '1.0.0',
+            'message': 'SynapTech API - Asistente con IA para gestión de tareas',
+            'version': '2.0.0 - Simplificado',
             'endpoints': {
-                'auth': '/api/auth',
-                'tasks': '/api/tasks',
-                'routines': '/api/routines',
-                'ai': '/api/ai',
-                'sync': '/api/sync',
-                'calendar': '/api/calendar',
-                'reports': '/api/reports'
-            }
+                'auth': '/api/auth - Autenticación',
+                'tasks': '/api/tasks - Crear y gestionar tareas (procesadas por IA)',
+                'routines': '/api/routines - Rutinas generadas dinámicamente por IA'
+            },
+            'features': [
+                'Creación de tareas por texto o voz procesadas por IA',
+                'El agente extrae automáticamente: título, prioridad y fecha',
+                'Rutinas dinámicas generadas en tiempo real por IA',
+                'Gestión simplificada de tareas'
+            ]
         }, 200
     
     # Manejador de errores 404

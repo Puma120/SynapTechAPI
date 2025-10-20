@@ -103,21 +103,6 @@ def login():
     except Exception as e:
         return jsonify({'error': f'Error al iniciar sesion: {str(e)}'}), 500
 
-@auth_bp.route('/refresh', methods=['POST'])
-@jwt_required(refresh=True)
-def refresh():
-    """Renovar token de acceso"""
-    try:
-        user_id = get_jwt_identity()
-        access_token = create_access_token(identity=user_id)
-        
-        return jsonify({
-            'access_token': access_token
-        }), 200
-        
-    except Exception as e:
-        return jsonify({'error': f'Error al renovar token: {str(e)}'}), 500
-
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
 def get_current_user():
@@ -135,79 +120,3 @@ def get_current_user():
         
     except Exception as e:
         return jsonify({'error': f'Error al obtener usuario: {str(e)}'}), 500
-
-@auth_bp.route('/update-profile', methods=['PUT'])
-@jwt_required()
-def update_profile():
-    """Actualizar perfil de usuario"""
-    try:
-        user_id = get_jwt_identity()
-        user = User.query.get(user_id)
-        
-        if not user:
-            return jsonify({'error': 'Usuario no encontrado'}), 404
-        
-        data = request.get_json()
-        
-        # Actualizar campos permitidos
-        if 'full_name' in data:
-            user.full_name = data['full_name'].strip()
-        
-        if 'email' in data:
-            new_email = data['email'].strip().lower()
-            if new_email != user.email:
-                if not validate_email(new_email):
-                    return jsonify({'error': 'Email invalido'}), 400
-                
-                existing = User.query.filter_by(email=new_email).first()
-                if existing:
-                    return jsonify({'error': 'Email ya esta en uso'}), 409
-                
-                user.email = new_email
-        
-        db.session.commit()
-        
-        return jsonify({
-            'message': 'Perfil actualizado exitosamente',
-            'user': user.to_dict()
-        }), 200
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': f'Error al actualizar perfil: {str(e)}'}), 500
-
-@auth_bp.route('/change-password', methods=['PUT'])
-@jwt_required()
-def change_password():
-    """Cambiar contrasena"""
-    try:
-        user_id = get_jwt_identity()
-        user = User.query.get(user_id)
-        
-        if not user:
-            return jsonify({'error': 'Usuario no encontrado'}), 404
-        
-        data = request.get_json()
-        current_password = data.get('current_password', '')
-        new_password = data.get('new_password', '')
-        
-        if not current_password or not new_password:
-            return jsonify({'error': 'Contrasena actual y nueva son requeridas'}), 400
-        
-        if not user.check_password(current_password):
-            return jsonify({'error': 'Contrasena actual incorrecta'}), 401
-        
-        password_valid, password_error = validate_password(new_password)
-        if not password_valid:
-            return jsonify({'error': password_error}), 400
-        
-        user.set_password(new_password)
-        db.session.commit()
-        
-        return jsonify({
-            'message': 'Contrasena cambiada exitosamente'
-        }), 200
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({'error': f'Error al cambiar contrasena: {str(e)}'}), 500
