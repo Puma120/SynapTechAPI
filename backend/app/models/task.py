@@ -18,9 +18,9 @@ class Task(db.Model):
     category = db.Column(db.String(50))
     created_from_voice = db.Column(db.Boolean, default=False)
     google_calendar_event_id = db.Column(db.String(255))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+    created_at = db.Column(db.DateTime, default=datetime.now(datetime), onupdate=datetime.now(datetime))
+    updated_at = db.Column(db.DateTime, default=datetime.now(datetime), onupdate=datetime.now(datetime))
+
     # Relaciones
     user = db.relationship('User', back_populates='tasks')
     
