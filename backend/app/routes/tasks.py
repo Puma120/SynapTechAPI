@@ -12,7 +12,7 @@ gemini_service = GeminiService()
 @jwt_required()
 def create_task():
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())  # Convertir de string a int
         data = request.get_json()
         
         body_text = data.get("cuerpo", "") if data else ""
@@ -48,7 +48,7 @@ def create_task():
 @jwt_required()
 def update_task_status(task_id):
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())  # Convertir de string a int
         data = request.get_json()
         
         if not data or "status" not in data:

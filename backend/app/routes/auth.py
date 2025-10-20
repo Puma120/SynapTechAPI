@@ -50,9 +50,8 @@ def register():
         db.session.add(user)
         db.session.commit()
         
-        # Generar tokens
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        # Generar tokens (identity debe ser string)
+        access_token = create_access_token(identity=str(user.id))
         
         return jsonify({
             'message': 'Usuario registrado exitosamente',
@@ -88,9 +87,8 @@ def login():
         if not user.is_active:
             return jsonify({'error': 'Usuario inactivo'}), 403
         
-        # Generar tokens
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        # Generar tokens (identity debe ser string)
+        access_token = create_access_token(identity=str(user.id))
         
         return jsonify({
             'message': 'Login exitoso',
@@ -106,7 +104,7 @@ def login():
 def get_current_user():
     """Obtener usuario actual"""
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())  # Convertir de string a int
         user = User.query.get(user_id)
         
         if not user:

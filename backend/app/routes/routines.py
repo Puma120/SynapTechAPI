@@ -10,7 +10,7 @@ gemini_service = GeminiService()
 @jwt_required()
 def get_routines():
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())  # Convertir de string a int
         
         user_tasks = Task.query.filter_by(user_id=current_user_id, status="pending").all()
         
