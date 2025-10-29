@@ -4,20 +4,74 @@ from datetime import datetime
 from app import db
 from app.models.task import Task
 from app.services.gemini_service import GeminiService
+from app.services.speech_service import SpeechService
 
 tasks_bp = Blueprint("tasks", __name__, url_prefix="/api/tasks")
 gemini_service = GeminiService()
+speech_service = SpeechService()
 
 @tasks_bp.route("", methods=["POST"])
 @jwt_required()
 def create_task():
+    """
+    Crear tarea desde texto o audio
+    
+    Acepta:
+    - JSON con campo 'cuerpo' (texto)
+    - Multipart/form-data con archivo 'audio' (WAV)
+    - Multipart/form-data con 'cuerpo' y/o 'audio' (combina ambos)
+    """
     try:
-        current_user_id = int(get_jwt_identity())  # Convertir de string a int
-        data = request.get_json()
+        current_user_id = int(get_jwt_identity())
+        body_text = ""
+        fecha = None
         
-        body_text = data.get("cuerpo", "") if data else ""
-        fecha = data.get("fecha") if data else None
+        # Verificar si es multipart/form-data (con posible archivo de audio)
+        if request.content_type and 'multipart/form-data' in request.content_type:
+            # Obtener datos del formulario
+            body_text = request.form.get("cuerpo", "").strip()
+            fecha = request.form.get("fecha")
+            audio_file = request.files.get("audio")
+            
+            # Si hay audio, transcribirlo
+            if audio_file:
+                try:
+                    audio_content = audio_file.read()
+                    transcribed_text = speech_service.transcribe_audio(audio_content)
+                    
+                    # Si no hay texto en cuerpo, usar solo el audio transcrito
+                    # Si hay texto, combinarlos
+                    if transcribed_text:
+                        if body_text:
+                            body_text = f"{body_text} {transcribed_text}".strip()
+                        else:
+                            body_text = transcribed_text.strip()
+                except Exception as e:
+                    return jsonify({
+                        "error": f"Error al transcribir audio: {str(e)}"
+                    }), 400
+            
+            # Si no hay audio ni texto, error
+            if not body_text:
+                return jsonify({
+                    "error": "Debe proporcionar 'cuerpo' (texto) o 'audio' (archivo WAV)"
+                }), 400
+        else:
+            # JSON normal
+            data = request.get_json()
+            if not data:
+                return jsonify({"error": "No se recibieron datos"}), 400
+            
+            body_text = data.get("cuerpo", "").strip()
+            fecha = data.get("fecha")
+            
+            # Validar que haya texto
+            if not body_text:
+                return jsonify({
+                    "error": "El campo 'cuerpo' es requerido"
+                }), 400
         
+        # Procesar con IA
         ai_result = gemini_service.process_task_input(body_text=body_text, fecha=fecha)
         
         new_task = Task(
