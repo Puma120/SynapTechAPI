@@ -10,6 +10,47 @@ tasks_bp = Blueprint("tasks", __name__, url_prefix="/api/tasks")
 gemini_service = GeminiService()
 speech_service = SpeechService()
 
+@tasks_bp.route("", methods=["GET"])
+@jwt_required()
+def get_tasks():
+    """
+    Obtener todas las tareas del usuario autenticado
+    
+    Query params opcionales:
+    - status: filtrar por estado (pending, in_progress, completed)
+    - limit: limitar número de resultados
+    """
+    try:
+        current_user_id = int(get_jwt_identity())
+        
+        # Obtener parámetros de query
+        status = request.args.get('status')
+        limit = request.args.get('limit', type=int)
+        
+        # Construir query
+        query = Task.query.filter_by(user_id=current_user_id)
+        
+        # Filtrar por estado si se proporciona
+        if status:
+            query = query.filter_by(status=status)
+        
+        # Ordenar por fecha de creación (más recientes primero)
+        query = query.order_by(Task.created_at.desc())
+        
+        # Limitar resultados si se especifica
+        if limit:
+            query = query.limit(limit)
+        
+        tasks = query.all()
+        
+        return jsonify({
+            "tasks": [task.to_dict() for task in tasks],
+            "total": len(tasks)
+        }), 200
+        
+    except Exception as e:
+        return jsonify({"error": f"Error al obtener tareas: {str(e)}"}), 500
+
 @tasks_bp.route("", methods=["POST"])
 @jwt_required()
 def create_task():

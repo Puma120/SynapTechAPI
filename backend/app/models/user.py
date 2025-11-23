@@ -17,6 +17,7 @@ class User(db.Model):
     
     # Relaciones
     tasks = db.relationship('Task', back_populates='user', lazy=True, cascade='all, delete-orphan')
+    medications = db.relationship('Medication', back_populates='user', lazy=True, cascade='all, delete-orphan')
     device_syncs = db.relationship('DeviceSync', back_populates='user', lazy=True, cascade='all, delete-orphan')
     
     def set_password(self, password):

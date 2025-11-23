@@ -17,6 +17,7 @@ def create_app(config_name='development'):
     from app.routes.auth import auth_bp
     from app.routes.tasks import tasks_bp
     from app.routes.routines import routines_bp
+    from app.routes.medications import medications_bp
     # Rutas antiguas comentadas - ahora todo está integrado con IA
     # from app.routes.ai import ai_bp
     # from app.routes.sync import sync_bp
@@ -26,6 +27,7 @@ def create_app(config_name='development'):
     app.register_blueprint(auth_bp)
     app.register_blueprint(tasks_bp)
     app.register_blueprint(routines_bp)
+    app.register_blueprint(medications_bp)
     # app.register_blueprint(ai_bp)
     # app.register_blueprint(sync_bp)
     # app.register_blueprint(calendar_bp)
