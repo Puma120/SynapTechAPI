@@ -11,7 +11,16 @@ class GeminiService:
         api_key = Config.GEMINI_API_KEY
         if api_key:
             genai.configure(api_key=api_key)
-            self.model = genai.GenerativeModel('gemini-3-pro-preview')
+            # Configuración con temperatura baja para evitar alucinaciones
+            generation_config = {
+                'temperature': 0.3,  # Más determinista, menos creativo
+                'top_p': 0.8,
+                'top_k': 40,
+            }
+            self.model = genai.GenerativeModel(
+                'gemini-3-pro-preview',
+                generation_config=generation_config
+            )
         else:
             self.model = None
     
@@ -136,13 +145,13 @@ NO añadas texto adicional, SOLO el JSON.
             ]
         """
         if not self.model or not user_tasks:
-            # Fallback: devolver tareas sin procesamiento
+            # Fallback: devolver TODAS las tareas sin procesamiento
             return [
                 {
                     'id_tarea': task['id'],
                     'cuerpo': task.get('body', task['title'])
                 }
-                for task in user_tasks[:5]  # Máximo 5 tareas
+                for task in user_tasks  # TODAS las tareas
             ]
         
         try:
@@ -164,29 +173,37 @@ Tienes acceso a las siguientes tareas pendientes del usuario:
 
 {json.dumps(tasks_summary, indent=2, ensure_ascii=False)}
 
+⚠️ IMPORTANTE: Debes incluir TODAS las tareas que te proporcioné en tu respuesta. No omitas ninguna.
+
 Tu objetivo:
-1. Selecciona las 3-5 tareas más importantes para hoy/mañana
-2. Para cada tarea, crea una sugerencia de rutina que incluya:
+1. Para CADA UNA de las tareas listadas arriba, crea una sugerencia de rutina que incluya:
    - Momento óptimo del día para hacerla
    - Estimación de tiempo necesario
    - Consejos para completarla (especialmente útiles para ADHD)
    - Pasos concretos si la tarea es compleja
 
-Considera:
-- Tareas urgentes primero
-- Agrupar tareas similares
-- Alternar tareas difíciles con más sencillas
-- Incluir breaks
+2. Organiza las tareas en orden prioritario:
+   - Tareas urgentes primero
+   - Luego tareas de alta prioridad
+   - Después tareas de prioridad media
+   - Finalmente tareas de prioridad baja
+
+3. Considera:
+   - Agrupar tareas similares
+   - Alternar tareas difíciles con más sencillas
+   - Incluir breaks entre tareas largas
+   - Fechas de vencimiento (due_date)
 
 Responde ÚNICAMENTE con un JSON válido en este formato exacto:
 [
     {{
         "id_tarea": 123,
-        "cuerpo": "Mañana (8:00-9:00) - 30min estimados\\n Pasos: ...\\n Consejo: ..."
+        "cuerpo": "Mañana (8:00-9:00) - 30min estimados\\nPasos: ...\\nConsejo: ..."
     }},
     ...
 ]
 
+RECUERDA: Debes incluir las {len(tasks_summary)} tareas en tu respuesta. NO omitas ninguna.
 NO añadas texto adicional, SOLO el JSON array.
 """
             
@@ -207,7 +224,7 @@ NO añadas texto adicional, SOLO el JSON array.
             
         except Exception as e:
             print(f"Error generando rutinas con IA: {str(e)}")
-            # Fallback: devolver tareas prioritarias sin procesamiento
+            # Fallback: devolver TODAS las tareas ordenadas por prioridad
             sorted_tasks = sorted(
                 user_tasks,
                 key=lambda x: (
@@ -221,7 +238,7 @@ NO añadas texto adicional, SOLO el JSON array.
                     'id_tarea': task['id'],
                     'cuerpo': f"{task['title']} - Prioridad: {task.get('priority', 'medium')}"
                 }
-                for task in sorted_tasks[:5]
+                for task in sorted_tasks  # TODAS las tareas
             ]
 
 # Instancia singleton
