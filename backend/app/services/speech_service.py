@@ -2,6 +2,7 @@
 import os
 import base64
 import wave
+import io
 from google.cloud import speech_v1
 from google.oauth2 import service_account
 from config import Config
@@ -22,6 +23,52 @@ class SpeechService:
             self.client = None
             self.use_rest_api = False
     
+    def detect_audio_format(self, audio_content):
+        """
+        Detecta el formato del archivo de audio
+        
+        Returns:
+            str: 'wav', 'm4a', o 'unknown'
+        """
+        # Verificar primeros bytes (magic numbers)
+        if audio_content[:4] == b'RIFF' and audio_content[8:12] == b'WAVE':
+            return 'wav'
+        elif audio_content[4:8] == b'ftyp':
+            return 'm4a'
+        else:
+            return 'unknown'
+    
+    def convert_m4a_to_wav(self, audio_content):
+        """
+        Convierte audio M4A a formato WAV
+        
+        Returns:
+            bytes: Audio en formato WAV
+        """
+        try:
+            from pydub import AudioSegment
+            
+            # Cargar M4A desde bytes
+            audio_buffer = io.BytesIO(audio_content)
+            audio = AudioSegment.from_file(audio_buffer, format="m4a")
+            
+            # Configurar para Speech-to-Text (16kHz, mono, 16-bit)
+            audio = audio.set_frame_rate(16000)
+            audio = audio.set_channels(1)
+            audio = audio.set_sample_width(2)  # 16-bit
+            
+            # Exportar a WAV
+            wav_buffer = io.BytesIO()
+            audio.export(wav_buffer, format="wav")
+            wav_buffer.seek(0)
+            
+            return wav_buffer.read()
+            
+        except ImportError:
+            raise Exception("pydub no está instalado. Ejecuta: pip install pydub")
+        except Exception as e:
+            raise Exception(f"Error convirtiendo M4A a WAV: {str(e)}")
+    
     def get_wav_info(self, audio_content):
         """
         Extrae información del archivo WAV
@@ -29,8 +76,6 @@ class SpeechService:
         Returns:
             dict: {'sample_rate': int, 'channels': int}
         """
-        import io
-        
         try:
             # Crear un buffer de bytes
             audio_buffer = io.BytesIO(audio_content)
@@ -56,7 +101,7 @@ class SpeechService:
         Transcribe audio a texto
         
         Args:
-            audio_content: bytes del archivo de audio (WAV recomendado)
+            audio_content: bytes del archivo de audio (WAV o M4A)
             language_code: Código de idioma (default: es-MX para español de México)
         
         Returns:
@@ -66,6 +111,16 @@ class SpeechService:
             raise Exception("SPEECH_API_KEY no configurada")
         
         try:
+            # Detectar formato de audio
+            audio_format = self.detect_audio_format(audio_content)
+            
+            # Si es M4A, convertir a WAV primero
+            if audio_format == 'm4a':
+                print("Detectado formato M4A, convirtiendo a WAV...")
+                audio_content = self.convert_m4a_to_wav(audio_content)
+            elif audio_format == 'unknown':
+                print("Formato de audio desconocido, intentando procesarlo como está...")
+            
             # Usar la REST API con la API key
             import requests
             

@@ -95,7 +95,7 @@ def create_task():
             # Si no hay audio ni texto, error
             if not body_text:
                 return jsonify({
-                    "error": "Debe proporcionar 'cuerpo' (texto) o 'audio' (archivo WAV)"
+                    "error": "Debe proporcionar 'cuerpo' (texto) o 'audio' (archivo WAV/M4A)"
                 }), 400
         else:
             # JSON normal
