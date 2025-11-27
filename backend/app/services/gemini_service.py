@@ -18,7 +18,7 @@ class GeminiService:
                 'top_k': 40,
             }
             self.model = genai.GenerativeModel(
-                'gemini-3-pro-preview',
+                'gemini-2.5-flash',
                 generation_config=generation_config
             )
         else:
@@ -138,7 +138,7 @@ NO añadas texto adicional, SOLO el JSON.
         Returns:
             list: [
                 {
-                    'id_tarea': int,
+                    'tarea': str (título de la tarea),
                     'cuerpo': str (sugerencia de cuándo/cómo hacerla)
                 },
                 ...
@@ -197,7 +197,7 @@ Tu objetivo:
 Responde ÚNICAMENTE con un JSON válido en este formato exacto:
 [
     {{
-        "id_tarea": 123,
+        "id_tarea": Titulo de la tarea,
         "cuerpo": "Mañana (8:00-9:00) - 30min estimados\\nPasos: ...\\nConsejo: ..."
     }},
     ...

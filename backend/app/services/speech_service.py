@@ -7,6 +7,7 @@ from google.cloud import speech_v1
 from google.oauth2 import service_account
 from config import Config
 
+
 class SpeechService:
     """Servicio para transcribir audio a texto usando Google Cloud Speech-to-Text"""
     
